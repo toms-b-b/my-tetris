@@ -20,7 +20,7 @@ export default class Renderer {
     this.nextCtx = this.nextCanvas.getContext('2d');
     
     this.cellSize = this.calculateCellSize();
-    this.previewCellSize = this.cellSize * 0.8; // Scale down preview pieces
+    this.previewCellSize = this.cellSize * 0.85; // Scale down preview pieces
     
     this.initializeCanvases();
     window.addEventListener('resize', () => this.handleResize());
@@ -47,18 +47,18 @@ export default class Renderer {
     this.gameCanvas.width = this.cellSize * PLAYFIELD_WIDTH;
     this.gameCanvas.height = this.cellSize * VISIBLE_HEIGHT;
   
-    // Hold piece canvas (4x4 grid)
+    // Hold piece canvas
     const holdContainer = document.querySelector('.hold-piece');
     if (holdContainer) {
-      this.holdCanvas.width = holdContainer.offsetWidth;
-      this.holdCanvas.height = holdContainer.offsetHeight;
+      this.holdCanvas.width = holdCanvas.offsetWidth;
+      this.holdCanvas.height = holdCanvas.offsetHeight;
     }
   
     // Next pieces canvas
     const nextContainer = document.querySelector('.next-pieces');
     if (nextContainer) {
-      this.nextCanvas.width = nextContainer.offsetWidth;
-      this.nextCanvas.height = nextContainer.offsetHeight;
+      this.nextCanvas.width = nextCanvas.offsetWidth;
+      this.nextCanvas.height = nextCanvas.offsetHeight;
     }
   }
 

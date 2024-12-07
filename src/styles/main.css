@@ -6,8 +6,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 20px;
+  height: 100vh;
+  padding: 0px;
   box-sizing: border-box;
 }
 
@@ -16,7 +16,7 @@ body {
   justify-content: center;
   flex-direction: row;
   gap: 20px;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100vh);
   max-width: 100%;
 }
 
@@ -27,30 +27,43 @@ body {
   justify-content: center;
   align-items: center;
   max-width: 60%;
-  width: auto;
 }
 
 .left-panel {
   display: flex;
-  flex-direction: column; /* Stack items vertically */
-  align-items: center; /* Center scoreboard horizontally */
-  justify-content: space-between; /* Center in the available space */
-  width: 15%; /* Adjust width as needed */
+  flex-direction: column;
+  align-items: center; 
+  justify-content: space-between; 
+  width: 15%; 
   max-height: calc(100vh - 40px);
   padding: 10px;
 }
 
 .score-board {
   display: flex;
-  flex-direction: column; /* Stack score elements */
-  justify-content: center; /* Center in the available space */
+  flex-direction: column; 
+  justify-content: center;
   align-items: center;
-  width: 100%; /* Match width of the panel */
-  background-color: #222; /* Optional for visualization */
+  width: 100%;
+  background-color: #222;
   padding: 10px;
   border-radius: 10px;
   border: 2px solid #fff;
   text-align: center;
+}
+
+.score-board div {
+  margin: 10px 0;
+  font-size: 1.2em;
+}
+
+.hold-piece {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 3px solid #9999;
 }
 
 #tetris-logo {
@@ -74,14 +87,6 @@ body {
   height: calc(100vh - 80px);
   border: 4px solid #111;
   border-radius: 10px;
-}
-
-.hold-piece {
-  flex: 0 0 calc(20% - 40px);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border: 3px solid #9999;
 }
 
 .next-pieces {
