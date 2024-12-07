@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tetris</title>
+    <link rel="stylesheet" href="src/styles/main.css" />
+  </head>
+  <body>
+    <div class="game-container">
+      <div class="score-board">
+        <div>Score: <span id="score">0</span></div>
+        <div>Level: <span id="level">1</span></div>
+        <div>Lines: <span id="lines">0</span></div>
+      </div>
+      <div class="main-panel">
+        <canvas id="gameCanvas"></canvas>
+      </div>
+      <div class="side-panel">
+        <div class="hold-piece">
+          <div class="text-container">
+            <h3>Hold</h3>
+          </div>
+          <canvas id="holdCanvas"></canvas>
+        </div>
+        <div class="next-pieces">
+          <div class="text-container">
+            <h3>Next</h3>
+          </div>
+          <canvas id="nextCanvas"></canvas>
+        </div> 
+      </div>
+    </div>
+    <audio id="bgMusic" loop>
+      <source src="assets/audio/korobeiniki.mp3" type="audio/mpeg" />
+    </audio>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
