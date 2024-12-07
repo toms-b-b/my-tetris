@@ -8,25 +8,30 @@
   </head>
   <body>
     <div class="game-container">
-      <div class="score-board">
-        <div>Score: <span id="score">0</span></div>
-        <div>Level: <span id="level">1</span></div>
-        <div>Lines: <span id="lines">0</span></div>
+      <div class="left-panel">
+        <div class="score-board">
+          <div>Score: <span id="score">0</span></div>
+          <div>Level: <span id="level">1</span></div>
+          <div>Lines: <span id="lines">0</span></div>
+        </div>
+        <div id="tetris-logo">
+          <img src="assets/tetris-logo.png" alt="Tetris Logo" class="tetris-logo" />
+          </div>
       </div>
       <div class="main-panel">
         <canvas id="gameCanvas"></canvas>
       </div>
-      <div class="side-panel">
+      <div class="right-panel">
+        <div class="text-container">
+          <h3>Hold</h3>
+        </div>
         <div class="hold-piece">
-          <div class="text-container">
-            <h3>Hold</h3>
-          </div>
           <canvas id="holdCanvas"></canvas>
         </div>
+        <div class="text-container">
+          <h3>Next</h3>
+        </div>
         <div class="next-pieces">
-          <div class="text-container">
-            <h3>Next</h3>
-          </div>
           <canvas id="nextCanvas"></canvas>
         </div> 
       </div>

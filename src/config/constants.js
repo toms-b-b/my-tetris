@@ -51,7 +51,6 @@ export const SCORING = {
   TETRIS: 800,
   SOFT_DROP: 1,
   HARD_DROP: 2,
-  T_SPIN: 400,
 };
 
 export const LOCK_DELAY = 500; // 0.5 seconds
