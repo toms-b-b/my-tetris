@@ -2,7 +2,7 @@ import GameController from './game/GameController.js';
 import Renderer from './game/Renderer.js';
 
 function showCopyrightNotice() {
-  // Check if user has seen the notice before
+
   if (sessionStorage.getItem('tetrisCopyrightShown')) {
     startGame();
     return;
@@ -25,7 +25,6 @@ function showCopyrightNotice() {
     'Tetris Logo Design by Roger Dean. All Rights Reserved.';
   document.body.appendChild(copyrightElement);
 
-  // Mark that the user has seen the notice
   sessionStorage.setItem('tetrisCopyrightShown', 'true');
 
   setTimeout(() => {

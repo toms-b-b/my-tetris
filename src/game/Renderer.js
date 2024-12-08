@@ -63,7 +63,12 @@ export default class Renderer {
   }
 
   clearCanvas(ctx) {
-    ctx.fillStyle = COLORS.background;
+    const canvasElement = ctx.canvas;
+    const computedStyle = getComputedStyle(canvasElement);
+    const backgroundColor = computedStyle.backgroundColor; 
+  
+    ctx.fillStyle = backgroundColor;
+  
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 
