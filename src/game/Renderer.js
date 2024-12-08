@@ -6,6 +6,7 @@ import {
   VISIBLE_HEIGHT,
   VISIBLE_NEXT_PIECES,
   GHOST_OPACITY,
+  PREVIEW_CELL_SCALE,
   TETROMINOS 
 } from '../config/constants.js';
 
@@ -20,7 +21,7 @@ export default class Renderer {
     this.nextCtx = this.nextCanvas.getContext('2d');
     
     this.cellSize = this.calculateCellSize();
-    this.previewCellSize = this.cellSize * 0.85; // Scale down preview pieces
+    this.previewCellSize = this.cellSize * PREVIEW_CELL_SCALE; // Scale down preview pieces
     
     this.initializeCanvases();
     window.addEventListener('resize', () => this.handleResize());
@@ -50,16 +51,25 @@ export default class Renderer {
     // Hold piece canvas
     const holdCanvas = document.getElementById('holdCanvas');
     if (holdCanvas) {
-      holdCanvas.width = holdCanvas.getAttribute('width') || 150; // Default to 150 if not set
-      holdCanvas.height = holdCanvas.getAttribute('height') || 150; // Default to 150 if not set
+      const container = holdCanvas.parentElement; // Get the parent container
+      const computedStyle = getComputedStyle(container);
+  
+      // Dynamically set the canvas size based on the parent's dimensions
+      holdCanvas.width = parseFloat(computedStyle.width);
+      holdCanvas.height = parseFloat(computedStyle.height);
     }
   
     // Next pieces canvas
     const nextCanvas = document.getElementById('nextCanvas');
     if (nextCanvas) {
-      nextCanvas.width = nextCanvas.getAttribute('width') || 200; // Default to 200 if not set
-      nextCanvas.height = nextCanvas.getAttribute('height') || 400; // Default to 400 if not set
+      const container = nextCanvas.parentElement; // Get the parent container
+      const computedStyle = getComputedStyle(container);
+  
+      // Dynamically set the canvas size based on the parent's dimensions
+      nextCanvas.width = parseFloat(computedStyle.width);
+      nextCanvas.height = parseFloat(computedStyle.height);
     }
+  
   }
 
   render(gameState) {
@@ -151,6 +161,7 @@ export default class Renderer {
 
   drawCurrentPiece(piece) {
     if (!piece) return;
+
     for (let y = 0; y < piece.shape.length; y++) {
       for (let x = 0; x < piece.shape[y].length; x++) {
         if (piece.shape[y][x]) {
@@ -224,12 +235,12 @@ export default class Renderer {
       
       // Calculate the maximum size that fits in the allocated space
       const maxPieceWidth = shape[0].length * this.previewCellSize;
-      const maxPieceHeight = 2 * this.previewCellSize;
+      const maxPieceHeight = shape.length * this.previewCellSize;
       
       // Center the piece horizontally and position it vertically
       const offsetX = (containerWidth - maxPieceWidth) / 2;
       const offsetY = index * heightPerPiece + (heightPerPiece - maxPieceHeight) / 2;
-
+      
       // Draw the piece
       for (let y = 0; y < shape.length; y++) {
         for (let x = 0; x < shape[y].length; x++) {
@@ -254,7 +265,7 @@ export default class Renderer {
   }
 
   drawGameOver() {
-    this.drawOverlay('GAME OVER');
+    this.drawOverlay('GAME OVER\nPress ENTER to restart');
   }
 
   drawPaused() {
@@ -264,15 +275,30 @@ export default class Renderer {
   drawOverlay(text) {
     this.gameCtx.fillStyle = 'rgba(0, 0, 0, 0.75)';
     this.gameCtx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-    
-    this.gameCtx.fillStyle = '#fff';
-    this.gameCtx.font = `${this.cellSize}px Arial`;
-    this.gameCtx.textAlign = 'center';
-    this.gameCtx.textBaseline = 'middle';
-    this.gameCtx.fillText(
-      text,
-      this.gameCanvas.width / 2,
-      this.gameCanvas.height / 2
-    );
+  
+    const lines = text.split('\n');
+    const lineHeight = this.cellSize * 1.2;
+    const totalHeight = lines.length * lineHeight;
+    const startY = (this.gameCanvas.height - totalHeight) / 2;
+  
+    lines.forEach((line, index) => {
+      if (index === 0) {
+        // First line (e.g., "GAME OVER")
+        this.gameCtx.fillStyle = '#fff';
+        this.gameCtx.font = `${this.cellSize}px Arial`; // Regular font size
+      } else {
+        // Second line (e.g., "Press ENTER to restart")
+        this.gameCtx.fillStyle = '#ccc'; // Slightly dimmer color
+        this.gameCtx.font = `${this.cellSize * 0.8}px Arial italic`; // Smaller size and italic
+      }
+      
+      this.gameCtx.textAlign = 'center';
+      this.gameCtx.textBaseline = 'middle';
+      this.gameCtx.fillText(
+        line,
+        this.gameCanvas.width / 2,
+        startY + index * lineHeight + lineHeight / 2
+      );
+    });
   }
-}
+} 

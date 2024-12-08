@@ -2,7 +2,7 @@ export const PLAYFIELD_WIDTH = 10;
 export const PLAYFIELD_HEIGHT = 40;
 export const VISIBLE_HEIGHT = 20;
 export const VISIBLE_NEXT_PIECES = 6;
-
+export const PREVIEW_CELL_SCALE = 0.8;
 export const MIN_CELL_SIZE = 20; // Minimum cell size to maintain playability
 
 export const GHOST_OPACITY = 0.3;

@@ -6,7 +6,13 @@ export class KeyboardController {
 
   setupInputHandlers() {
     document.addEventListener('keydown', (event) => {
-      if (this.gameController.gameOver) return;
+      if (this.gameController.gameOver) {
+        if (event.code === 'Enter') {
+          this.gameController.reset();
+          return;
+        }
+        return;
+      }
 
       if (event.code === 'Escape' || event.code === 'F1') {
         this.gameController.togglePause();
@@ -23,8 +29,9 @@ export class KeyboardController {
           this.gameController.movePiece(1, 0);
           break;
         case 'ArrowDown':
-          this.gameController.movePiece(0, 1);
-          this.gameController.score += 1; // SCORING.SOFT_DROP
+          if (this.gameController.movePiece(0, 1)) {
+            this.gameController.score += 1; // SCORING.SOFT_DROP
+          }
           break;
         case 'ArrowUp':
         case 'KeyX':
@@ -40,10 +47,6 @@ export class KeyboardController {
         case 'ShiftLeft':
         case 'KeyC':
           this.gameController.holdPiece();
-          break;
-        case 'Escape':
-        case 'F1':
-          this.gameController.togglePause();
           break;
       }
     });

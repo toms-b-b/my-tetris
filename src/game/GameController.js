@@ -5,8 +5,14 @@ import { SCORING, LEVEL_SPEEDS, LOCK_DELAY } from '../config/constants.js';
 
 export default class GameController {
   constructor(renderer) {
-    this.board = new Board();
     this.renderer = renderer;
+    this.keyboardController = null;
+    this.reset();
+    this.keyboardController = new KeyboardController(this);
+  }
+
+  reset() {
+    this.board = new Board();
     this.pieceManager = new PieceManager();
     this.score = 0;
     this.level = 1;
@@ -16,29 +22,58 @@ export default class GameController {
     this.lastMoveTime = 0;
     this.lockDelayTimer = null;
     this.dropInterval = LEVEL_SPEEDS[1];
+    this.isLocking = false;
+    this.gameLoopId = null;
     
     this.initializeGame();
-    new KeyboardController(this);
   }
 
   initializeGame() {
+    if (this.gameLoopId) {
+      cancelAnimationFrame(this.gameLoopId);
+      this.gameLoopId = null;
+    }
+    
     this.pieceManager.currentPiece = this.pieceManager.getNextPiece();
     this.pieceManager.updateGhostPiece(this.board);
     this.startGameLoop();
   }
 
   movePiece(dx, dy) {
+    if (this.isLocking || this.gameOver) return false;
+    
     const piece = this.pieceManager.currentPiece;
     if (!piece.checkCollision(this.board.grid, dx, dy)) {
       piece.x += dx;
       piece.y += dy;
       this.pieceManager.updateGhostPiece(this.board);
+      
+      if (this.lockDelayTimer) {
+        clearTimeout(this.lockDelayTimer);
+        this.lockDelayTimer = null;
+      }
       return true;
+    }
+    
+    if (dy > 0 && !this.lockDelayTimer && !this.isLocking) {
+      this.startLockDelay();
     }
     return false;
   }
 
+  startLockDelay() {
+    if (this.lockDelayTimer || this.isLocking) return;
+    
+    this.isLocking = true;
+    this.lockDelayTimer = setTimeout(() => {
+      this.lockPiece();
+      this.lockDelayTimer = null;
+    }, LOCK_DELAY);
+  }
+
   rotatePiece(direction) {
+    if (this.isLocking || this.gameOver) return;
+    
     const piece = this.pieceManager.currentPiece;
     const originalShape = piece.shape.map(row => [...row]);
     piece.rotate(direction);
@@ -47,26 +82,59 @@ export default class GameController {
       piece.shape = originalShape;
     } else {
       this.pieceManager.updateGhostPiece(this.board);
+      
+      if (this.lockDelayTimer) {
+        clearTimeout(this.lockDelayTimer);
+        this.lockDelayTimer = null;
+        this.isLocking = false;
+      }
     }
   }
 
   hardDrop() {
-    while (this.movePiece(0, 1)) {
-      this.score += SCORING.HARD_DROP;
+    if (this.isLocking || this.gameOver) return;
+    
+    if (this.lockDelayTimer) {
+      clearTimeout(this.lockDelayTimer);
+      this.lockDelayTimer = null;
     }
+    
+    let dropDistance = 0;
+    while (this.movePiece(0, 1)) {
+      dropDistance++;
+    }
+    
+    this.score += dropDistance * SCORING.HARD_DROP;
+    this.isLocking = true;
     this.lockPiece();
   }
 
   holdPiece() {
+    if (this.isLocking || this.gameOver) return;
+    
     if (this.pieceManager.holdCurrentPiece()) {
+      if (this.lockDelayTimer) {
+        clearTimeout(this.lockDelayTimer);
+        this.lockDelayTimer = null;
+        this.isLocking = false;
+      }
       this.pieceManager.updateGhostPiece(this.board);
     }
   }
 
   lockPiece() {
+    if (!this.isLocking) return;
+    
     this.board.addPiece(this.pieceManager.currentPiece);
     const linesCleared = this.board.clearLines();
     this.updateScore(linesCleared);
+    
+    if (this.lockDelayTimer) {
+      clearTimeout(this.lockDelayTimer);
+      this.lockDelayTimer = null;
+    }
+    
+    this.isLocking = false;
     
     this.pieceManager.currentPiece = this.pieceManager.getNextPiece();
     this.pieceManager.resetHoldAbility();
@@ -111,18 +179,7 @@ export default class GameController {
     if (this.gameOver) return;
 
     if (this.paused) {
-      this.renderer.render({
-        board: this.board,
-        currentPiece: this.pieceManager.currentPiece,
-        ghostPiece: this.pieceManager.ghostPiece,
-        holdPiece: this.pieceManager.holdPiece,
-        bag: this.pieceManager.bag,
-        score: this.score,
-        level: this.level,
-        lines: this.lines,
-        gameOver: this.gameOver,
-        paused: this.paused
-      });
+      this.renderer.render(this.getGameState());
       return;
     }
 
@@ -130,40 +187,35 @@ export default class GameController {
     
     if (deltaTime > this.dropInterval) {
       if (!this.movePiece(0, 1)) {
-        if (!this.lockDelayTimer) {
-          this.lockDelayTimer = setTimeout(() => {
-            this.lockPiece();
-            this.lockDelayTimer = null;
-          }, LOCK_DELAY);
-        }
-      } else {
-        if (this.lockDelayTimer) {
-          clearTimeout(this.lockDelayTimer);
-          this.lockDelayTimer = null;
+        if (!this.lockDelayTimer && !this.isLocking) {
+          this.startLockDelay();
         }
       }
       this.lastMoveTime = timestamp;
     }
   }
 
+  getGameState() {
+    return {
+      board: this.board,
+      currentPiece: this.pieceManager.currentPiece,
+      ghostPiece: this.pieceManager.ghostPiece,
+      holdPiece: this.pieceManager.holdPiece,
+      bag: this.pieceManager.bag,
+      score: this.score,
+      level: this.level,
+      lines: this.lines,
+      gameOver: this.gameOver,
+      paused: this.paused
+    };
+  }
+
   startGameLoop() {
     const gameLoop = (timestamp) => {
-      console.log('Game loop running', { paused: this.paused });
       this.update(timestamp);
-      this.renderer.render({
-        board: this.board,
-        currentPiece: this.pieceManager.currentPiece,
-        ghostPiece: this.pieceManager.ghostPiece,
-        holdPiece: this.pieceManager.holdPiece,
-        bag: this.pieceManager.bag,
-        score: this.score,
-        level: this.level,
-        lines: this.lines,
-        gameOver: this.gameOver,
-        paused: this.paused
-      });
-      requestAnimationFrame(gameLoop);
+      this.renderer.render(this.getGameState());
+      this.gameLoopId = requestAnimationFrame(gameLoop);
     };
-    requestAnimationFrame(gameLoop);
+    this.gameLoopId = requestAnimationFrame(gameLoop);
   }
 }
