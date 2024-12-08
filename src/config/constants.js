@@ -29,6 +29,16 @@ export const TETROMINOS = {
   L: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
 };
 
+export const SPAWN_POSITIONS = {
+  I: { row: 21, col: 3 }, // Spawns in middle columns (3-6)
+  O: { row: 21, col: 4 }, // Spawns in middle columns (4-5)
+  J: { row: 21, col: 3 }, // Spawns in left-middle columns
+  L: { row: 21, col: 3 }, // Spawns in left-middle columns
+  S: { row: 21, col: 3 }, // Spawns in left-middle columns
+  T: { row: 21, col: 3 }, // Spawns in left-middle columns
+  Z: { row: 21, col: 3 }  // Spawns in left-middle columns
+};
+
 export const LEVEL_SPEEDS = {
   1: 1000,
   2: 793,

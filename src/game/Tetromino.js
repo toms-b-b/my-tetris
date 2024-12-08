@@ -1,4 +1,4 @@
-import { TETROMINOS, COLORS } from '../config/constants.js';
+import { TETROMINOS, COLORS, PLAYFIELD_WIDTH } from '../config/constants.js';
 
 export default class Tetromino {
   constructor(type) {
@@ -6,9 +6,9 @@ export default class Tetromino {
     this.shape = TETROMINOS[type];
     this.color = COLORS[type];
     this.x = type === 'I' || type === 'O' 
-      ? Math.floor((10 - this.shape[0].length) / 2)
-      : Math.floor((10 - this.shape[0].length) / 2) - 1;
-    this.y = type === 'I' ? 21 : 22;
+      ? Math.floor((PLAYFIELD_WIDTH - this.shape[0].length) / 2)
+      : Math.floor((PLAYFIELD_WIDTH - this.shape[0].length) / 2) - 1;
+    this.y = type === 'I' ? 19 : 20;
     this.rotation = 0;
   }
 
@@ -51,12 +51,11 @@ export default class Tetromino {
           const boardX = newX + x;
           const boardY = newY + y;
           
-          // Check boundaries and board collision
           if (
-            boardX < 0 || // Left wall
-            boardX >= board[0].length || // Right wall
-            boardY >= board.length || // Bottom boundary
-            (boardY >= 0 && board[boardY][boardX]) // Collision with placed pieces
+            boardX < 0 || 
+            boardX >= board[0].length || 
+            boardY >= board.length ||
+            (boardY >= 0 && board[boardY][boardX])
           ) {
             return true;
           }
