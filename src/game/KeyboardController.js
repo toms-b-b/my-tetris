@@ -14,6 +14,10 @@ export class KeyboardController {
         return;
       }
 
+      if (this.gameController.isCountingDown) {
+        return;
+      }
+
       if (event.code === 'Escape' || event.code === 'F1') {
         this.gameController.togglePause();
         return;
@@ -30,7 +34,7 @@ export class KeyboardController {
           break;
         case 'ArrowDown':
           if (this.gameController.movePiece(0, 1)) {
-            this.gameController.score += 1; // SCORING.SOFT_DROP
+            this.gameController.score += 1;
           }
           break;
         case 'ArrowUp':

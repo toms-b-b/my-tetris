@@ -24,23 +24,35 @@ export default class GameController {
     this.dropInterval = LEVEL_SPEEDS[1];
     this.isLocking = false;
     this.gameLoopId = null;
+    this.countdownValue = 3;
+    this.isCountingDown = true;
     
-    this.initializeGame();
+    this.startGameLoop(); // Start the game loop immediately
+    this.startCountdown();
+  }
+
+  startCountdown() {
+    this.countdownValue = 3;
+    this.isCountingDown = true;
+    
+    const countdownInterval = setInterval(() => {
+      this.countdownValue--;
+      
+      if (this.countdownValue <= 0) {
+        clearInterval(countdownInterval);
+        this.isCountingDown = false;
+        this.initializeGame();
+      }
+    }, 1000);
   }
 
   initializeGame() {
-    if (this.gameLoopId) {
-      cancelAnimationFrame(this.gameLoopId);
-      this.gameLoopId = null;
-    }
-    
     this.pieceManager.currentPiece = this.pieceManager.getNextPiece();
     this.pieceManager.updateGhostPiece(this.board);
-    this.startGameLoop();
   }
 
   movePiece(dx, dy) {
-    if (this.isLocking || this.gameOver) return false;
+    if (this.isLocking || this.gameOver || this.isCountingDown) return false;
     
     const piece = this.pieceManager.currentPiece;
     if (!piece.checkCollision(this.board.grid, dx, dy)) {
@@ -72,7 +84,7 @@ export default class GameController {
   }
 
   rotatePiece(direction) {
-    if (this.isLocking || this.gameOver) return;
+    if (this.isLocking || this.gameOver || this.isCountingDown) return;
     
     const piece = this.pieceManager.currentPiece;
     const originalShape = piece.shape.map(row => [...row]);
@@ -92,7 +104,7 @@ export default class GameController {
   }
 
   hardDrop() {
-    if (this.isLocking || this.gameOver) return;
+    if (this.isLocking || this.gameOver || this.isCountingDown) return;
     
     if (this.lockDelayTimer) {
       clearTimeout(this.lockDelayTimer);
@@ -110,7 +122,7 @@ export default class GameController {
   }
 
   holdPiece() {
-    if (this.isLocking || this.gameOver) return;
+    if (this.isLocking || this.gameOver || this.isCountingDown) return;
     
     if (this.pieceManager.holdCurrentPiece()) {
       if (this.lockDelayTimer) {
@@ -172,11 +184,12 @@ export default class GameController {
   }
 
   togglePause() {
+    if (this.isCountingDown) return;
     this.paused = !this.paused;
   }
 
   update(timestamp) {
-    if (this.gameOver) return;
+    if (this.gameOver || this.isCountingDown) return;
 
     if (this.paused) {
       this.renderer.render(this.getGameState());
@@ -206,7 +219,9 @@ export default class GameController {
       level: this.level,
       lines: this.lines,
       gameOver: this.gameOver,
-      paused: this.paused
+      paused: this.paused,
+      isCountingDown: this.isCountingDown,
+      countdownValue: this.countdownValue
     };
   }
 

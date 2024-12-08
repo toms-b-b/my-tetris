@@ -4,7 +4,7 @@ import Renderer from './game/Renderer.js';
 function showCopyrightNotice() {
   // Check if user has seen the notice before
   if (sessionStorage.getItem('tetrisCopyrightShown')) {
-    startCountdown();
+    startGame();
     return;
   }
 
@@ -30,32 +30,8 @@ function showCopyrightNotice() {
 
   setTimeout(() => {
     copyrightElement.remove();
-    startCountdown();
+    startGame();
   }, 5000);
-}
-
-function startCountdown() {
-  let countdown = 3;
-  const countdownElement = document.createElement('div');
-  countdownElement.style.position = 'absolute';
-  countdownElement.style.fontSize = '60px';
-  countdownElement.style.color = 'white';
-  countdownElement.style.textAlign = 'center';
-  countdownElement.style.width = '100%';
-  countdownElement.style.top = '50%';
-  countdownElement.style.transform = 'translateY(-50%)';
-  document.body.appendChild(countdownElement);
-
-  const countdownInterval = setInterval(() => {
-    if (countdown > 0) {
-      countdownElement.textContent = countdown;
-      countdown--;
-    } else {
-      clearInterval(countdownInterval);
-      countdownElement.remove();
-      startGame();
-    }
-  }, 1000);
 }
 
 function startGame() {

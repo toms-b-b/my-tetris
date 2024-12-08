@@ -21,7 +21,7 @@ export default class Renderer {
     this.nextCtx = this.nextCanvas.getContext('2d');
     
     this.cellSize = this.calculateCellSize();
-    this.previewCellSize = this.cellSize * PREVIEW_CELL_SCALE; // Scale down preview pieces
+    this.previewCellSize = this.cellSize * PREVIEW_CELL_SCALE;
     
     this.initializeCanvases();
     window.addEventListener('resize', () => this.handleResize());
@@ -44,50 +44,21 @@ export default class Renderer {
   }
 
   initializeCanvases() {
-    // Main game canvas
     this.gameCanvas.width = this.cellSize * PLAYFIELD_WIDTH;
     this.gameCanvas.height = this.cellSize * VISIBLE_HEIGHT;
-  
-    // Hold piece canvas
-    const holdCanvas = document.getElementById('holdCanvas');
-    if (holdCanvas) {
-      const container = holdCanvas.parentElement; // Get the parent container
-      const computedStyle = getComputedStyle(container);
-  
-      // Dynamically set the canvas size based on the parent's dimensions
-      holdCanvas.width = parseFloat(computedStyle.width);
-      holdCanvas.height = parseFloat(computedStyle.height);
-    }
-  
-    // Next pieces canvas
-    const nextCanvas = document.getElementById('nextCanvas');
-    if (nextCanvas) {
-      const container = nextCanvas.parentElement; // Get the parent container
-      const computedStyle = getComputedStyle(container);
-  
-      // Dynamically set the canvas size based on the parent's dimensions
-      nextCanvas.width = parseFloat(computedStyle.width);
-      nextCanvas.height = parseFloat(computedStyle.height);
-    }
-  
-  }
-
-  render(gameState) {
-    this.clearCanvas(this.gameCtx);
-    this.clearCanvas(this.holdCtx);
-    this.clearCanvas(this.nextCtx);
     
-    this.drawBoard(gameState.board);
-    this.drawGhostPiece(gameState.ghostPiece);
-    this.drawCurrentPiece(gameState.currentPiece);
-    this.drawHoldPiece(gameState.holdPiece);
-    this.drawNextPieces(gameState.bag.slice(0, VISIBLE_NEXT_PIECES));
-    this.updateScore(gameState);
+    if (this.holdCanvas) {
+      const container = this.holdCanvas.parentElement;
+      const computedStyle = getComputedStyle(container);
+      this.holdCanvas.width = parseFloat(computedStyle.width);
+      this.holdCanvas.height = parseFloat(computedStyle.height);
+    }
     
-    if (gameState.gameOver) {
-      this.drawGameOver();
-    } else if (gameState.paused) {
-      this.drawPaused();
+    if (this.nextCanvas) {
+      const container = this.nextCanvas.parentElement;
+      const computedStyle = getComputedStyle(container);
+      this.nextCanvas.width = parseFloat(computedStyle.width);
+      this.nextCanvas.height = parseFloat(computedStyle.height);
     }
   }
 
@@ -136,16 +107,13 @@ export default class Renderer {
   drawCell(ctx, x, y, color, size) {
     const borderWidth = Math.max(1, size * 0.1);
     
-    // Fill main color
     ctx.fillStyle = color;
     ctx.fillRect(x, y, size, size);
     
-    // Draw lighter top/left edges
     ctx.fillStyle = this.adjustBrightness(color, 50);
     ctx.fillRect(x, y, size, borderWidth);
     ctx.fillRect(x, y, borderWidth, size);
     
-    // Draw darker bottom/right edges
     ctx.fillStyle = this.adjustBrightness(color, -50);
     ctx.fillRect(x, y + size - borderWidth, size, borderWidth);
     ctx.fillRect(x + size - borderWidth, y, borderWidth, size);
@@ -195,15 +163,12 @@ export default class Renderer {
     const shape = TETROMINOS[pieceType];
     const color = COLORS[pieceType];
     
-    // Calculate the maximum size that fits in the canvas while maintaining aspect ratio
     const maxPieceWidth = shape[0].length * this.previewCellSize;
     const maxPieceHeight = shape.length * this.previewCellSize;
     
-    // Center the piece in the canvas
     const offsetX = (this.holdCanvas.width - maxPieceWidth) / 2;
     const offsetY = (this.holdCanvas.height - maxPieceHeight) / 2;
     
-    // Draw the piece
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
         if (shape[y][x]) {
@@ -226,22 +191,18 @@ export default class Renderer {
     const containerHeight = this.nextCanvas.height;
     const containerWidth = this.nextCanvas.width;
     
-    // Calculate the height available for each piece including spacing
     const heightPerPiece = containerHeight / totalPieces;
     
     pieces.forEach((pieceType, index) => {
       const shape = TETROMINOS[pieceType];
       const color = COLORS[pieceType];
       
-      // Calculate the maximum size that fits in the allocated space
       const maxPieceWidth = shape[0].length * this.previewCellSize;
       const maxPieceHeight = shape.length * this.previewCellSize;
       
-      // Center the piece horizontally and position it vertically
       const offsetX = (containerWidth - maxPieceWidth) / 2;
       const offsetY = index * heightPerPiece + (heightPerPiece - maxPieceHeight) / 2;
       
-      // Draw the piece
       for (let y = 0; y < shape.length; y++) {
         for (let x = 0; x < shape[y].length; x++) {
           if (shape[y][x]) {
@@ -283,13 +244,11 @@ export default class Renderer {
   
     lines.forEach((line, index) => {
       if (index === 0) {
-        // First line (e.g., "GAME OVER")
         this.gameCtx.fillStyle = '#fff';
-        this.gameCtx.font = `${this.cellSize}px Arial`; // Regular font size
+        this.gameCtx.font = `bold ${this.cellSize * 1.5}px Arial`;
       } else {
-        // Second line (e.g., "Press ENTER to restart")
-        this.gameCtx.fillStyle = '#ccc'; // Slightly dimmer color
-        this.gameCtx.font = `${this.cellSize * 0.8}px Arial italic`; // Smaller size and italic
+        this.gameCtx.fillStyle = '#ccc';
+        this.gameCtx.font = `${this.cellSize * 0.8}px Arial italic`;
       }
       
       this.gameCtx.textAlign = 'center';
@@ -301,4 +260,29 @@ export default class Renderer {
       );
     });
   }
-} 
+
+  render(gameState) {
+    this.clearCanvas(this.gameCtx);
+    this.clearCanvas(this.holdCtx);
+    this.clearCanvas(this.nextCtx);
+    
+    this.drawBoard(gameState.board);
+    
+    if (!gameState.isCountingDown) {
+      this.drawGhostPiece(gameState.ghostPiece);
+      this.drawCurrentPiece(gameState.currentPiece);
+    }
+    
+    this.drawHoldPiece(gameState.holdPiece);
+    this.drawNextPieces(gameState.bag.slice(0, VISIBLE_NEXT_PIECES));
+    this.updateScore(gameState);
+    
+    if (gameState.isCountingDown) {
+      this.drawOverlay(gameState.countdownValue.toString());
+    } else if (gameState.gameOver) {
+      this.drawGameOver();
+    } else if (gameState.paused) {
+      this.drawPaused();
+    }
+  }
+}
