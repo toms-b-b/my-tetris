@@ -6,8 +6,15 @@ export class KeyboardController {
 
   setupInputHandlers() {
     document.addEventListener('keydown', (event) => {
-      if (this.gameController.gameOver || this.gameController.paused) return;
+      if (this.gameController.gameOver) return;
 
+      if (event.code === 'Escape' || event.code === 'F1') {
+        this.gameController.togglePause();
+        return;
+      }
+    
+      if (this.gameController.paused) return;
+      
       switch (event.code) {
         case 'ArrowLeft':
           this.gameController.movePiece(-1, 0);

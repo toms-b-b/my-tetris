@@ -108,7 +108,23 @@ export default class GameController {
   }
 
   update(timestamp) {
-    if (this.gameOver || this.paused) return;
+    if (this.gameOver) return;
+
+    if (this.paused) {
+      this.renderer.render({
+        board: this.board,
+        currentPiece: this.pieceManager.currentPiece,
+        ghostPiece: this.pieceManager.ghostPiece,
+        holdPiece: this.pieceManager.holdPiece,
+        bag: this.pieceManager.bag,
+        score: this.score,
+        level: this.level,
+        lines: this.lines,
+        gameOver: this.gameOver,
+        paused: this.paused
+      });
+      return;
+    }
 
     const deltaTime = timestamp - this.lastMoveTime;
     
@@ -132,6 +148,7 @@ export default class GameController {
 
   startGameLoop() {
     const gameLoop = (timestamp) => {
+      console.log('Game loop running', { paused: this.paused });
       this.update(timestamp);
       this.renderer.render({
         board: this.board,

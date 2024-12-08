@@ -4,14 +4,14 @@ import Renderer from './game/Renderer.js';
 // Copyright notice
 const copyrightElement = document.createElement('div');
 copyrightElement.style.position = 'absolute';
-copyrightElement.style.fontSize = '20px';
+copyrightElement.style.fontSize = '1rem';
 copyrightElement.style.color = 'white';
 copyrightElement.style.textAlign = 'center';
-copyrightElement.style.width = '90%'; // Width of the box
+copyrightElement.style.width = '60%'; // Width of the box
 copyrightElement.style.top = '50%';
 copyrightElement.style.left = '50%';
 copyrightElement.style.transform = 'translate(-50%, -50%)';
-copyrightElement.style.background = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black background
+copyrightElement.style.background = 'rgba(0, 0, 0, 0.9)'; // Semi-transparent black background
 copyrightElement.style.padding = '20px'; // Padding inside the box
 copyrightElement.style.borderRadius = '15px'; // Rounded corners
 copyrightElement.textContent = 'Tetris © 1985~1970 Tetris Holding. Tetris logos, Tetris theme song and Tetriminos are trademarks of Tetris Holding. ' +

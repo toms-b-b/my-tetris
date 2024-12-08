@@ -38,7 +38,7 @@ export default class Renderer {
 
   handleResize() {
     this.cellSize = this.calculateCellSize();
-    this.previewCellSize = this.cellSize * 1;
+    this.previewCellSize = this.cellSize * 0.8;
     this.initializeCanvases();
   }
 
@@ -48,17 +48,17 @@ export default class Renderer {
     this.gameCanvas.height = this.cellSize * VISIBLE_HEIGHT;
   
     // Hold piece canvas
-    const holdContainer = document.querySelector('.hold-piece');
-    if (holdContainer) {
-      this.holdCanvas.width = holdCanvas.offsetWidth;
-      this.holdCanvas.height = holdCanvas.offsetHeight;
+    const holdCanvas = document.getElementById('holdCanvas');
+    if (holdCanvas) {
+      holdCanvas.width = holdCanvas.getAttribute('width') || 150; // Default to 150 if not set
+      holdCanvas.height = holdCanvas.getAttribute('height') || 150; // Default to 150 if not set
     }
   
     // Next pieces canvas
-    const nextContainer = document.querySelector('.next-pieces');
-    if (nextContainer) {
-      this.nextCanvas.width = nextCanvas.offsetWidth;
-      this.nextCanvas.height = nextCanvas.offsetHeight;
+    const nextCanvas = document.getElementById('nextCanvas');
+    if (nextCanvas) {
+      nextCanvas.width = nextCanvas.getAttribute('width') || 200; // Default to 200 if not set
+      nextCanvas.height = nextCanvas.getAttribute('height') || 400; // Default to 400 if not set
     }
   }
 
@@ -151,7 +151,6 @@ export default class Renderer {
 
   drawCurrentPiece(piece) {
     if (!piece) return;
-    
     for (let y = 0; y < piece.shape.length; y++) {
       for (let x = 0; x < piece.shape[y].length; x++) {
         if (piece.shape[y][x]) {
@@ -225,12 +224,12 @@ export default class Renderer {
       
       // Calculate the maximum size that fits in the allocated space
       const maxPieceWidth = shape[0].length * this.previewCellSize;
-      const maxPieceHeight = shape.length * this.previewCellSize;
+      const maxPieceHeight = 2 * this.previewCellSize;
       
       // Center the piece horizontally and position it vertically
       const offsetX = (containerWidth - maxPieceWidth) / 2;
       const offsetY = index * heightPerPiece + (heightPerPiece - maxPieceHeight) / 2;
-      
+
       // Draw the piece
       for (let y = 0; y < shape.length; y++) {
         for (let x = 0; x < shape[y].length; x++) {
