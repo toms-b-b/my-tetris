@@ -47,6 +47,9 @@ export default class Renderer {
     this.gameCanvas.width = this.cellSize * PLAYFIELD_WIDTH;
     this.gameCanvas.height = this.cellSize * VISIBLE_HEIGHT;
     
+    // Set canvas to have a transparent background
+    this.gameCtx.globalCompositeOperation = 'source-over';
+    
     if (this.holdCanvas) {
       const container = this.holdCanvas.parentElement;
       const computedStyle = getComputedStyle(container);
@@ -65,11 +68,11 @@ export default class Renderer {
   clearCanvas(ctx) {
     const canvasElement = ctx.canvas;
     const computedStyle = getComputedStyle(canvasElement);
-    const backgroundColor = computedStyle.backgroundColor; 
+    const backgroundColor = computedStyle.backgroundColor;
   
     ctx.fillStyle = backgroundColor;
-  
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    ctx.ClearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 
   drawBoard(board) {
@@ -168,19 +171,24 @@ export default class Renderer {
     const shape = TETROMINOS[pieceType];
     const color = COLORS[pieceType];
     
-    const maxPieceWidth = shape[0].length * this.previewCellSize;
-    const maxPieceHeight = shape.length * this.previewCellSize;
+    // Find the actual bounds of the piece
+    const { minX, maxX, minY, maxY } = this.findPieceBounds(shape);
     
-    const offsetX = (this.holdCanvas.width - maxPieceWidth) / 2;
-    const offsetY = (this.holdCanvas.height - maxPieceHeight) / 2;
+    // Calculate the actual width and height of the filled area
+    const actualWidth = (maxX - minX + 1) * this.previewCellSize;
+    const actualHeight = (maxY - minY + 1) * this.previewCellSize;
+    
+    // Calculate center offsets
+    const offsetX = (this.holdCanvas.width - actualWidth) / 2;
+    const offsetY = (this.holdCanvas.height - actualHeight) / 2;
     
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
         if (shape[y][x]) {
           this.drawCell(
             this.holdCtx,
-            offsetX + x * this.previewCellSize,
-            offsetY + y * this.previewCellSize,
+            offsetX + (x - minX) * this.previewCellSize,
+            offsetY + (y - minY) * this.previewCellSize,
             color,
             this.previewCellSize
           );
@@ -189,9 +197,29 @@ export default class Renderer {
     }
   }
 
+  findPieceBounds(shape) {
+    let minX = shape[0].length;
+    let maxX = -1;
+    let minY = shape.length;
+    let maxY = -1;
+    
+    for (let y = 0; y < shape.length; y++) {
+      for (let x = 0; x < shape[y].length; x++) {
+        if (shape[y][x]) {
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+    
+    return { minX, maxX, minY, maxY };
+  }
+
   drawNextPieces(pieces) {
     if (!pieces.length) return;
-
+  
     const totalPieces = pieces.length;
     const containerHeight = this.nextCanvas.height;
     const containerWidth = this.nextCanvas.width;
@@ -202,19 +230,24 @@ export default class Renderer {
       const shape = TETROMINOS[pieceType];
       const color = COLORS[pieceType];
       
-      const maxPieceWidth = shape[0].length * this.previewCellSize;
-      const maxPieceHeight = shape.length * this.previewCellSize;
+      // Find the actual bounds of the piece
+      const { minX, maxX, minY, maxY } = this.findPieceBounds(shape);
       
-      const offsetX = (containerWidth - maxPieceWidth) / 2;
-      const offsetY = index * heightPerPiece + (heightPerPiece - maxPieceHeight) / 2;
+      // Calculate the actual width and height of the filled area
+      const actualWidth = (maxX - minX + 1) * this.previewCellSize;
+      const actualHeight = (maxY - minY + 1) * this.previewCellSize;
+      
+      // Calculate center offsets
+      const offsetX = (containerWidth - actualWidth) / 2;
+      const offsetY = index * heightPerPiece + (heightPerPiece - actualHeight) / 2;
       
       for (let y = 0; y < shape.length; y++) {
         for (let x = 0; x < shape[y].length; x++) {
           if (shape[y][x]) {
             this.drawCell(
               this.nextCtx,
-              offsetX + x * this.previewCellSize,
-              offsetY + y * this.previewCellSize,
+              offsetX + (x - minX) * this.previewCellSize,
+              offsetY + (y - minY) * this.previewCellSize,
               color,
               this.previewCellSize
             );
@@ -267,11 +300,13 @@ export default class Renderer {
   }
 
   render(gameState) {
-    this.clearCanvas(this.gameCtx);
-    this.clearCanvas(this.holdCtx);
-    this.clearCanvas(this.nextCtx);
+    this.gameCtx.clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
+    this.holdCtx.clearRect(0, 0, this.holdCanvas.width, this.holdCanvas.height);
+    this.nextCtx.clearRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
     
+    // Redraw all content
     this.drawBoard(gameState.board);
+    this.drawCurrentPiece(gameState.currentPiece);
     
     if (!gameState.isCountingDown) {
       this.drawGhostPiece(gameState.ghostPiece);

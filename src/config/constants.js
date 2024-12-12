@@ -15,7 +15,7 @@ export const COLORS = {
   J: '#0000f0', // Blue
   L: '#f0a000', // Orange
   ghost: '#ffffff',
-  background: '#000000',
+  background: 'rgba(0, 0, 0, 0.6)',
   grid: '#333333',
 };
 
